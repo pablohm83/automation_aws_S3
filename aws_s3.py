@@ -9,13 +9,6 @@ ACCESS_KEY_ID = input('Ingresar Access key ID')
 ACCESS_SECRET_KEY = input('Ingresar Access secret key')
 
 #Genero vars
-BUCKET_NAME='archivosutilitarios'
-#BUCKET_NAME='pruebatest3'
-#FILE_NAME_DOWNLOAD='Dockerfile.txt'
-FILE_NAME_DOWNLOAD='file_aws.txt'
-#FILE_NAME_UPLOAD='/Users/pablocapelli/Desktop/projects/aws_s3/file_aws.txt'
-PATH_DOWNLOAD='/Users/pablocapelli/Desktop/aws/file_aws.txt'
-FILE_NAME_UPLOAD='/Users/pablocapelli/Desktop/projects/aws_s3/file_aws.txt'
 menu_options = {
     1: 'Crear Bucket',
     2: 'Listar Buckets',
@@ -80,7 +73,9 @@ def upload_file(file_name, bucket, object_name=None):
         object_name = os.path.basename(file_name)
 
     # Upload the file
-    s3_client = boto3.client('s3')
+    s3_client = boto3.client('s3',
+        aws_access_key_id=ACCESS_KEY_ID, 
+        aws_secret_access_key=ACCESS_SECRET_KEY)
     try:
         response = s3_client.upload_file(file_name, bucket, object_name)
     except ClientError as e:
@@ -88,9 +83,9 @@ def upload_file(file_name, bucket, object_name=None):
         return False
     return True
 
-def download_file(file_name, bucket, object_name=None):
+def download_file(path_download, file_name, bucket, object_name=None):
     try:
-        s3.Bucket(bucket).download_file(file_name,PATH_DOWNLOAD);
+        s3.Bucket(bucket).download_file(file_name,path_download+'/'+file_name);
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == '404':
             print('No existe el file')
@@ -100,7 +95,10 @@ def download_file(file_name, bucket, object_name=None):
     print ('Se bajo el File pedido: '+ file_name)
 
 def list_buckets():
-    s3_client = boto3.client('s3')
+    s3_client = boto3.client('s3',
+        aws_access_key_id=ACCESS_KEY_ID,
+        aws_secret_access_key=ACCESS_SECRET_KEY
+        )
     response = s3_client.list_buckets()
         # Output the bucket names
     print('Buckets existentes:')
@@ -113,12 +111,6 @@ def list_files_bucket(BUCKET_NAME):
     print ("Files:")
     for item in listBucket:
         print ("    "+item.key)
-
-#create_bucket('archivos-a-analizar')
-#upload_file(FILE_NAME_UPLOAD, BUCKET_NAME)
-#lista_buckets()
-#list_files_bucket('archivos-a-analizar')
-#download_file(FILE_NAME_DOWNLOAD,BUCKET_NAME)
 
 if __name__=='__main__':
     while(True):
@@ -143,7 +135,8 @@ if __name__=='__main__':
         elif option == 5:
             BUCKET_NAME = input('Ingrese el nombre del bucket desde donde se bajara el achivo: ')
             FILE_NAME_DOWNLOAD = input('Ingrese el nombre del archivo a bajar: ')
-            download_file(FILE_NAME_DOWNLOAD,BUCKET_NAME)            
+            path_download=input('Ingrese el path destino: ')
+            download_file(path_download, FILE_NAME_DOWNLOAD,BUCKET_NAME)
         elif option == 6:
             exit()
         else:
