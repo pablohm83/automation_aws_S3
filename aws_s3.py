@@ -5,10 +5,8 @@ from botocore  import client
 from botocore.client  import Config
 import os
 
-print('Ingresar Access key ID')
-ACCESS_KEY_ID = input()
-print('Ingresar Access secret key')
-ACCESS_SECRET_KEY = input()
+ACCESS_KEY_ID = input('Ingresar Access key ID')
+ACCESS_SECRET_KEY = input('Ingresar Access secret key')
 
 #Genero vars
 BUCKET_NAME='archivosutilitarios'
@@ -18,12 +16,24 @@ FILE_NAME_DOWNLOAD='file_aws.txt'
 #FILE_NAME_UPLOAD='/Users/pablocapelli/Desktop/projects/aws_s3/file_aws.txt'
 PATH_DOWNLOAD='/Users/pablocapelli/Desktop/aws/file_aws.txt'
 FILE_NAME_UPLOAD='/Users/pablocapelli/Desktop/projects/aws_s3/file_aws.txt'
+menu_options = {
+    1: 'Crear Bucket',
+    2: 'Listar Buckets',
+    3: 'Listar archivos en Bucket',
+    4: 'Subir archivo',
+    5: 'Bajar archivo',
+    6: 'Exit',
+}
 
 
 #Genero conexión con aws resource y client
 s3 = boto3.resource('s3',
     aws_access_key_id=ACCESS_KEY_ID, 
     aws_secret_access_key=ACCESS_SECRET_KEY)
+
+def print_menu():
+    for key in menu_options.keys():
+        print (key, '--', menu_options[key] )
 
 def create_bucket(bucket_name, region=None):
     """Create an S3 bucket in a specified region
@@ -53,6 +63,7 @@ def create_bucket(bucket_name, region=None):
     except ClientError as e:
         logging.error(e)
         return False
+    print ("Bucket "+BUCKET_NAME+" generado")
     return True
 
 def upload_file(file_name, bucket, object_name=None):
@@ -103,8 +114,37 @@ def list_files_bucket(BUCKET_NAME):
     for item in listBucket:
         print ("    "+item.key)
 
-create_bucket('archivos-a-analizar')
+#create_bucket('archivos-a-analizar')
 #upload_file(FILE_NAME_UPLOAD, BUCKET_NAME)
 #lista_buckets()
 #list_files_bucket('archivos-a-analizar')
 #download_file(FILE_NAME_DOWNLOAD,BUCKET_NAME)
+
+if __name__=='__main__':
+    while(True):
+        print_menu()
+        option = ''
+        try:
+            option = int(input('Ingresá la acción a ejecutar: '))
+        except:
+            print('Error, Solo ingreso numerico ...')
+        if option == 1:
+            BUCKET_NAME = input('Ingrese el nombre del bucket a crear: ')
+            create_bucket(BUCKET_NAME)
+        elif option == 2:
+            list_buckets()
+        elif option == 3:
+            BUCKET_NAME = input('Ingrese el nombre del bucket para listar los archivos: ')
+            list_files_bucket(BUCKET_NAME)
+        elif option == 4:
+            BUCKET_NAME = input('Ingrese el nombre del bucket donde se subira el achivo: ')
+            FILE_NAME_UPLOAD = input('Ingrese el path y nombre del archivo. EJ: /home/file.txt: ')
+            upload_file(FILE_NAME_UPLOAD,BUCKET_NAME)
+        elif option == 5:
+            BUCKET_NAME = input('Ingrese el nombre del bucket desde donde se bajara el achivo: ')
+            FILE_NAME_DOWNLOAD = input('Ingrese el nombre del archivo a bajar: ')
+            download_file(FILE_NAME_DOWNLOAD,BUCKET_NAME)            
+        elif option == 6:
+            exit()
+        else:
+            print('Opcion invalida. Ingresar un numero del 1 al 6.')
