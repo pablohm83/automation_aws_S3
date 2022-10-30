@@ -5,15 +5,14 @@ from botocore  import client
 from botocore.client  import Config
 import os
 
-
 print('Ingresar Access key ID')
 ACCESS_KEY_ID = input()
 print('Ingresar Access secret key')
 ACCESS_SECRET_KEY = input()
 
 #Genero vars
-#BUCKET_NAME='archivosutilitarios'
-BUCKET_NAME='pruebatest3'
+BUCKET_NAME='archivosutilitarios'
+#BUCKET_NAME='pruebatest3'
 #FILE_NAME_DOWNLOAD='Dockerfile.txt'
 FILE_NAME_DOWNLOAD='file_aws.txt'
 #FILE_NAME_UPLOAD='/Users/pablocapelli/Desktop/projects/aws_s3/file_aws.txt'
@@ -21,13 +20,11 @@ PATH_DOWNLOAD='/Users/pablocapelli/Desktop/aws/file_aws.txt'
 FILE_NAME_UPLOAD='/Users/pablocapelli/Desktop/projects/aws_s3/file_aws.txt'
 
 
-#Genero conexión con aws resource
+#Genero conexión con aws resource y client
 s3 = boto3.resource('s3',
     aws_access_key_id=ACCESS_KEY_ID, 
     aws_secret_access_key=ACCESS_SECRET_KEY)
 
-
-#Generar bucket
 def create_bucket(bucket_name, region=None):
     """Create an S3 bucket in a specified region
 
@@ -42,10 +39,14 @@ def create_bucket(bucket_name, region=None):
     # Create bucket
     try:
         if region is None:
-            s3_client = boto3.client('s3')
+            s3_client = boto3.client('s3',
+                aws_access_key_id=ACCESS_KEY_ID, 
+                aws_secret_access_key=ACCESS_SECRET_KEY)
             s3_client.create_bucket(Bucket=bucket_name)
         else:
-            s3_client = boto3.client('s3', region_name=region)
+            s3_client = boto3.client('s3', region_name=region,
+            aws_access_key_id=ACCESS_KEY_ID,
+            aws_secret_access_key=ACCESS_SECRET_KEY)
             location = {'LocationConstraint': region}
             s3_client.create_bucket(Bucket=bucket_name,
                                     CreateBucketConfiguration=location)
@@ -87,7 +88,7 @@ def download_file(file_name, bucket, object_name=None):
             raise
     print ('Se bajo el File pedido: '+ file_name)
 
-def listar_buckets():
+def list_buckets():
     s3_client = boto3.client('s3')
     response = s3_client.list_buckets()
         # Output the bucket names
@@ -95,9 +96,15 @@ def listar_buckets():
     for bucket in response['Buckets']:
         print(f'  {bucket["Name"]}')
 
-def listar_files_en_bucket(BUCKET_NAME):
+def list_files_bucket(BUCKET_NAME):
     listBucket= s3.Bucket(BUCKET_NAME).objects.all()
     print ("Bucket: "+ s3.Bucket(BUCKET_NAME).name)
     print ("Files:")
     for item in listBucket:
         print ("    "+item.key)
+
+create_bucket('archivos-a-analizar')
+#upload_file(FILE_NAME_UPLOAD, BUCKET_NAME)
+#lista_buckets()
+#list_files_bucket('archivos-a-analizar')
+#download_file(FILE_NAME_DOWNLOAD,BUCKET_NAME)
