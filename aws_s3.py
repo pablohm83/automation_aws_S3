@@ -19,10 +19,13 @@ menu_options = {
 }
 
 
-#Genero conexión con aws resource y client
-s3 = boto3.resource('s3',
-    aws_access_key_id=ACCESS_KEY_ID, 
-    aws_secret_access_key=ACCESS_SECRET_KEY)
+#Genero conexión con aws resource
+try:
+    s3 = boto3.resource('s3',
+        aws_access_key_id=ACCESS_KEY_ID, 
+        aws_secret_access_key=ACCESS_SECRET_KEY)
+except ClientError as e:
+    logging.error(e)
 
 def print_menu():
     for key in menu_options.keys():
@@ -71,16 +74,15 @@ def upload_file(file_name, bucket, object_name=None):
     # If S3 object_name was not specified, use file_name
     if object_name is None:
         object_name = os.path.basename(file_name)
-
-    # Upload the file
-    s3_client = boto3.client('s3',
-        aws_access_key_id=ACCESS_KEY_ID, 
-        aws_secret_access_key=ACCESS_SECRET_KEY)
     try:
+        s3_client = boto3.client('s3',
+            aws_access_key_id=ACCESS_KEY_ID, 
+            aws_secret_access_key=ACCESS_SECRET_KEY)
         response = s3_client.upload_file(file_name, bucket, object_name)
     except ClientError as e:
         logging.error(e)
         return False
+    print('Se subio el archivo '+file_name+' en el bucket '+bucket)
     return True
 
 def download_file(path_download, file_name, bucket, object_name=None):
@@ -92,25 +94,36 @@ def download_file(path_download, file_name, bucket, object_name=None):
             return False
         else:
             raise
+    return True
     print ('Se bajo el File pedido: '+ file_name)
 
 def list_buckets():
-    s3_client = boto3.client('s3',
-        aws_access_key_id=ACCESS_KEY_ID,
-        aws_secret_access_key=ACCESS_SECRET_KEY
-        )
+    try:
+        s3_client = boto3.client('s3',
+            aws_access_key_id=ACCESS_KEY_ID,
+            aws_secret_access_key=ACCESS_SECRET_KEY
+            )
+    except ClientError as e:
+        logging.error(e)
+        return False    
     response = s3_client.list_buckets()
         # Output the bucket names
     print('Buckets existentes:')
     for bucket in response['Buckets']:
         print(f'  {bucket["Name"]}')
+    return True
 
 def list_files_bucket(BUCKET_NAME):
-    listBucket= s3.Bucket(BUCKET_NAME).objects.all()
+    try:
+        listBucket= s3.Bucket(BUCKET_NAME).objects.all()
+    except ClientError as e:
+        logging.error(e)
+        return False    
     print ("Bucket: "+ s3.Bucket(BUCKET_NAME).name)
     print ("Files:")
     for item in listBucket:
         print ("    "+item.key)
+    return True
 
 if __name__=='__main__':
     while(True):
