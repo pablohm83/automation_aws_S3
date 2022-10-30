@@ -8,6 +8,7 @@ import os
 ACCESS_KEY_ID = input('Ingresar Access key ID')
 ACCESS_SECRET_KEY = input('Ingresar Access secret key')
 
+
 #Genero vars
 menu_options = {
     1: 'Crear Bucket',
@@ -15,21 +16,21 @@ menu_options = {
     3: 'Listar archivos en Bucket',
     4: 'Subir archivo',
     5: 'Bajar archivo',
-    6: 'Exit',
+    6: 'Obtener ACLs de un bucket',
+    7: 'Exit',
 }
 
-
-#Genero conexión con aws resource
-try:
-    s3 = boto3.resource('s3',
-        aws_access_key_id=ACCESS_KEY_ID, 
-        aws_secret_access_key=ACCESS_SECRET_KEY)
-except ClientError as e:
-    logging.error(e)
 
 def print_menu():
     for key in menu_options.keys():
         print (key, '--', menu_options[key] )
+
+def get_acls(bucket_name):
+    try:
+        result = s3_client.get_bucket_acl(Bucket=bucket_name)
+        print(result)
+    except:
+        print('Error al obtener la data ')
 
 def create_bucket(bucket_name, region=None):
     """Create an S3 bucket in a specified region
@@ -126,6 +127,17 @@ def list_files_bucket(BUCKET_NAME):
     return True
 
 if __name__=='__main__':
+    #chequeo de credenciales OK
+    try:
+        s3_client = boto3.client('s3',
+            aws_access_key_id=ACCESS_KEY_ID,
+            aws_secret_access_key=ACCESS_SECRET_KEY
+            )
+        s3_client.list_buckets()
+    except:
+        print('Error en credenciales')
+        exit(1)
+
     while(True):
         print_menu()
         option = ''
@@ -151,6 +163,9 @@ if __name__=='__main__':
             path_download=input('Ingrese el path destino: ')
             download_file(path_download, FILE_NAME_DOWNLOAD,BUCKET_NAME)
         elif option == 6:
+            BUCKET_NAME = input('Ingrese el nombre del bucket para obtener las ACLs ')
+            get_acls(BUCKET_NAME)
+        elif option == 7:
             exit()
         else:
             print('Opcion invalida. Ingresar un numero del 1 al 6.')
