@@ -26,6 +26,7 @@ s3 = boto3.resource('s3',
     aws_access_key_id=ACCESS_KEY_ID, 
     aws_secret_access_key=ACCESS_SECRET_KEY)
 
+
 #Generar bucket
 def create_bucket(bucket_name, region=None):
     """Create an S3 bucket in a specified region
@@ -74,3 +75,14 @@ def upload_file(file_name, bucket, object_name=None):
         logging.error(e)
         return False
     return True
+
+def download_file(file_name, bucket, object_name=None):
+    try:
+        s3.Bucket(bucket).download_file(file_name,PATH_DOWNLOAD);
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == '404':
+            print('No existe el file')
+            return False
+        else:
+            raise
+    print ('Se bajo el File pedido: '+ file_name)
