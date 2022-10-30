@@ -5,6 +5,7 @@ from botocore  import client
 from botocore.client  import Config
 import os
 
+
 print('Ingresar Access key ID')
 ACCESS_KEY_ID = input()
 print('Ingresar Access secret key')
@@ -20,8 +21,7 @@ PATH_DOWNLOAD='/Users/pablocapelli/Desktop/aws/file_aws.txt'
 FILE_NAME_UPLOAD='/Users/pablocapelli/Desktop/projects/aws_s3/file_aws.txt'
 
 
-#Genero conexión con aws
-
+#Genero conexión con aws resource
 s3 = boto3.resource('s3',
     aws_access_key_id=ACCESS_KEY_ID, 
     aws_secret_access_key=ACCESS_SECRET_KEY)
@@ -86,3 +86,18 @@ def download_file(file_name, bucket, object_name=None):
         else:
             raise
     print ('Se bajo el File pedido: '+ file_name)
+
+def listar_buckets():
+    s3_client = boto3.client('s3')
+    response = s3_client.list_buckets()
+        # Output the bucket names
+    print('Buckets existentes:')
+    for bucket in response['Buckets']:
+        print(f'  {bucket["Name"]}')
+
+def listar_files_en_bucket(BUCKET_NAME):
+    listBucket= s3.Bucket(BUCKET_NAME).objects.all()
+    print ("Bucket: "+ s3.Bucket(BUCKET_NAME).name)
+    print ("Files:")
+    for item in listBucket:
+        print ("    "+item.key)
