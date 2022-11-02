@@ -14,6 +14,8 @@ El siguiente script se utliza para interactuar con el servicio de Buckets de AWS
 * Bajada de archivos desde un Bucket a una máquina de usuario o EC2
 * Obtención de ACLs de un bucket pedido
 
+Es soportado para Windows, MacOs y Linux, entre otros.
+
 ## Variables adicionales y/o parámetros
 
 No requeridos.
