@@ -3,6 +3,7 @@ from pickle import FALSE
 import boto3
 from botocore.exceptions import ClientError
 import os
+import json
 
 
 #Genero vars
@@ -72,7 +73,8 @@ def print_menu():
 def get_acls(bucket_name):
     try:
         result = s3_client.get_bucket_acl(Bucket=bucket_name)
-        print(result)
+        json_formatted_str = json.dumps(result, indent=2)
+        print(json_formatted_str)
     except Exception as ex:
         print('Error al obtener los ACL del bucket '+bucket_name+' Error: '+str(ex))
         return FALSE        
