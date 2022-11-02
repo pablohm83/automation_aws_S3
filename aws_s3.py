@@ -1,11 +1,11 @@
 
 import logging
 from pickle import FALSE
-import sys
 import boto3
 from botocore.exceptions import ClientError
 import os
 import json
+import os.path
 
 
 #Genero vars
@@ -123,7 +123,8 @@ def upload_file(file_name, bucket, object_name=None):
 
 def download_file(path_download, file_name, bucket, object_name=None):
     try:
-        s3.Bucket(bucket).download_file(file_name,path_download+'/'+file_name);
+        pathandfile = os.path.join(path_download, file_name)
+        s3.Bucket(bucket).download_file(file_name,pathandfile);
     except ClientError as e:
         print ('No se pudo bajar el file '+ str(e))
         return False
@@ -155,12 +156,17 @@ def list_files_bucket(BUCKET_NAME):
         print ("Bucket: "+ s3.Bucket(BUCKET_NAME).name)
         print ("Files:")
         for item in listBucket:
-            print ("    "+item.key)
-        return True
+            print ("    "+item.key)  
     except ClientError as e:
         print ('Error al listar archivos: '+str(e))
         return False
-
+    except Exception as ex:
+        print ('Error al listar archivos: '+str(ex))
+        return False
+    except:
+        print ('Error al listar archivos:')
+    return True
+    
 if __name__=='__main__':
     OK=True
     while (OK):
