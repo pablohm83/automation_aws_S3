@@ -1,15 +1,16 @@
 import logging
+from pickle import FALSE
 import boto3
 from botocore.exceptions import ClientError
-from botocore  import client
-from botocore.client  import Config
 import os
-
-ACCESS_KEY_ID = input('Ingresar Access key ID')
-ACCESS_SECRET_KEY = input('Ingresar Access secret key')
 
 
 #Genero vars
+ACCESS_KEY_ID=''
+ACCESS_SECRET_KEY=''
+s3 = boto3.resource('s3')
+s3_client = boto3.client('s3')
+
 menu_options = {
     1: 'Crear Bucket',
     2: 'Listar Buckets',
@@ -20,8 +21,45 @@ menu_options = {
     7: 'Exit',
 }
 
+def ask_user():
+    OPTION_USER = input('Usar ACCESS KEYs de AWS CLI? [y/n]: ')
+    if (OPTION_USER.lower() == 'n' or OPTION_USER.lower() == 'no'):
+        global ACCESS_KEY_ID
+        global ACCESS_SECRET_KEY
+        ACCESS_KEY_ID = input('Ingresar Access key ID: ')
+        ACCESS_SECRET_KEY = input('Ingresar Access secret key: ')
+        try:
+            #make instances client and resource with new credencials
+            global s3
+            global s3_client
+            s3_client = boto3.client('s3',
+                aws_access_key_id=ACCESS_KEY_ID,
+                aws_secret_access_key=ACCESS_SECRET_KEY
+                )
+
+            s3 = boto3.resource('s3',
+            aws_access_key_id=ACCESS_KEY_ID, 
+            aws_secret_access_key=ACCESS_SECRET_KEY)
+            
+            #test credentials
+            response = s3_client.list_buckets()
+        except:
+            print('Error en credenciales o conexion')
+            exit(1)
+        return False
+    elif (OPTION_USER.lower() == 'y' or OPTION_USER.lower() == 'yes'):
+        try:
+            response = s3_client.list_buckets()
+        except:
+            print('Error en credenciales o conexion')
+            exit(1)        
+        return False
+    else:
+        print('Opcion incorrecta, solo [y/n]')
+        return True
 
 def print_menu():
+    print(' ')
     for key in menu_options.keys():
         print (key, '--', menu_options[key] )
 
@@ -30,9 +68,9 @@ def get_acls(bucket_name):
         result = s3_client.get_bucket_acl(Bucket=bucket_name)
         print(result)
     except:
-        print('Error al obtener la data ')
+        print('Error al obtener los ACL ')
 
-def create_bucket(bucket_name, region=None):
+def create_bucket(bucket_name):
     """Create an S3 bucket in a specified region
 
     If a region is not specified, the bucket is created in the S3 default
@@ -45,21 +83,11 @@ def create_bucket(bucket_name, region=None):
 
     # Create bucket
     try:
-        if region is None:
-            s3_client = boto3.client('s3',
-                aws_access_key_id=ACCESS_KEY_ID, 
-                aws_secret_access_key=ACCESS_SECRET_KEY)
-            s3_client.create_bucket(Bucket=bucket_name)
-        else:
-            s3_client = boto3.client('s3', region_name=region,
-            aws_access_key_id=ACCESS_KEY_ID,
-            aws_secret_access_key=ACCESS_SECRET_KEY)
-            location = {'LocationConstraint': region}
-            s3_client.create_bucket(Bucket=bucket_name,
-                                    CreateBucketConfiguration=location)
-    except ClientError as e:
-        logging.error(e)
-        return False
+        s3_client.create_bucket(Bucket=bucket_name)
+    except:
+        #logging.error(e)
+        print("Error en creación de bucket ")
+        return FALSE
     print ("Bucket "+BUCKET_NAME+" generado")
     return True
 
@@ -71,45 +99,39 @@ def upload_file(file_name, bucket, object_name=None):
     :param object_name: S3 object name. If not specified then file_name is used
     :return: True if file was uploaded, else False
     """
-    #COMPRESS FILES tar.gz 
 
     # If S3 object_name was not specified, use file_name
     if object_name is None:
         object_name = os.path.basename(file_name)
     try:
-        s3_client = boto3.client('s3',
-            aws_access_key_id=ACCESS_KEY_ID, 
-            aws_secret_access_key=ACCESS_SECRET_KEY)
         response = s3_client.upload_file(file_name, bucket, object_name)
     except ClientError as e:
         logging.error(e)
         return False
+    except:
+        print('No se pudo subir el file pedido')
     print('Se subio el archivo '+file_name+' en el bucket '+bucket)
     return True
 
 def download_file(path_download, file_name, bucket, object_name=None):
     try:
         s3.Bucket(bucket).download_file(file_name,path_download+'/'+file_name);
-    except botocore.exceptions.ClientError as e:
-        if e.response['Error']['Code'] == '404':
-            print('No existe el file')
-            return False
-        else:
-            raise
-    return True
+    except ClientError as e:
+        print ('No se pudo bajar el file '+ str(e))
+        return False
+    except:
+        print ('No se pudo bajar el file pedido ')
     print ('Se bajo el File pedido: '+ file_name)
+    return True
+
 
 def list_buckets():
     try:
-        s3_client = boto3.client('s3',
-            aws_access_key_id=ACCESS_KEY_ID,
-            aws_secret_access_key=ACCESS_SECRET_KEY
-            )
+        response = s3_client.list_buckets()
     except ClientError as e:
         logging.error(e)
+        print ('Error al listar Buckets: '+str(e))
         return False    
-    response = s3_client.list_buckets()
-        # Output the bucket names
     print('Buckets existentes:')
     for bucket in response['Buckets']:
         print(f'  {bucket["Name"]}')
@@ -118,26 +140,19 @@ def list_buckets():
 def list_files_bucket(BUCKET_NAME):
     try:
         listBucket= s3.Bucket(BUCKET_NAME).objects.all()
+        print ("Bucket: "+ s3.Bucket(BUCKET_NAME).name)
+        print ("Files:")
+        for item in listBucket:
+            print ("    "+item.key)
+        return True
     except ClientError as e:
-        logging.error(e)
-        return False    
-    print ("Bucket: "+ s3.Bucket(BUCKET_NAME).name)
-    print ("Files:")
-    for item in listBucket:
-        print ("    "+item.key)
-    return True
+        print ('Error al listar archivos: '+str(e))
+        return False
 
 if __name__=='__main__':
-    #chequeo de credenciales OK
-    try:
-        s3_client = boto3.client('s3',
-            aws_access_key_id=ACCESS_KEY_ID,
-            aws_secret_access_key=ACCESS_SECRET_KEY
-            )
-        s3_client.list_buckets()
-    except:
-        print('Error en credenciales')
-        exit(1)
+    OK=True
+    while (OK):
+        OK=ask_user()
 
     while(True):
         print_menu()
@@ -164,7 +179,7 @@ if __name__=='__main__':
             path_download=input('Ingrese el path destino: ')
             download_file(path_download, FILE_NAME_DOWNLOAD,BUCKET_NAME)
         elif option == 6:
-            BUCKET_NAME = input('Ingrese el nombre del bucket para obtener las ACLs ')
+            BUCKET_NAME = input('Ingrese el nombre del bucket para obtener las ACLs: ')
             get_acls(BUCKET_NAME)
         elif option == 7:
             exit()
