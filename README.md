@@ -49,7 +49,7 @@ En caso de necesitar reportar errores, por favor hacerlo mediante Issues de este
 ## Pre-requisitos
 
 * Python 2.7+ o Python 3.4+
-* Tener instalada la librería Boto3 para Python
+* Tener instalado el SDK Boto3 para Python
     * Python 2.7+ --> pip install boto3
     * Python 3.4+ --> pip3 install boto3
 * Ejecutar el script con permisos mínimos de Escritura en el directorio de bajada y permisos de lectura en el directorio de subida
