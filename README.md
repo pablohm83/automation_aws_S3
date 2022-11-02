@@ -16,7 +16,7 @@ El siguiente script se utliza para interactuar con el servicio de Buckets de AWS
 
 ## Variables adicionales y/o parámetros
 
-No se necesitan para ejecutar el script en cuestión.
+No requeridos.
 
 <br>
 
