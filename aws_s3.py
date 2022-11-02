@@ -43,6 +43,9 @@ def ask_user():
             
             #test credentials
             response = s3_client.list_buckets()
+        except Exception as ex:
+            print('Error en credenciales o conexion: '+str(ex))
+            exit(1)            
         except:
             print('Error en credenciales o conexion')
             exit(1)
@@ -50,6 +53,9 @@ def ask_user():
     elif (OPTION_USER.lower() == 'y' or OPTION_USER.lower() == 'yes'):
         try:
             response = s3_client.list_buckets()
+        except Exception as ex:
+            print('Error en credenciales o conexion: '+str(ex))
+            exit(1)
         except:
             print('Error en credenciales o conexion')
             exit(1)        
@@ -67,25 +73,19 @@ def get_acls(bucket_name):
     try:
         result = s3_client.get_bucket_acl(Bucket=bucket_name)
         print(result)
+    except Exception as ex:
+        print('Error al obtener los ACL del bucket '+bucket_name+' Error: '+str(ex))
+        return FALSE        
     except:
-        print('Error al obtener los ACL ')
+        print('Error al obtener los ACL del bucket: '+bucket_name)
 
 def create_bucket(bucket_name):
-    """Create an S3 bucket in a specified region
-
-    If a region is not specified, the bucket is created in the S3 default
-    region (us-east-1).
-
-    :param bucket_name: Bucket to create
-    :param region: String region to create bucket in, e.g., 'us-west-2'
-    :return: True if bucket created, else False
-    """
-
-    # Create bucket
     try:
         s3_client.create_bucket(Bucket=bucket_name)
+    except Exception as ex:
+        print("Error en creación de bucket: "+str(ex))
+        return FALSE
     except:
-        #logging.error(e)
         print("Error en creación de bucket ")
         return FALSE
     print ("Bucket "+BUCKET_NAME+" generado")
@@ -108,8 +108,12 @@ def upload_file(file_name, bucket, object_name=None):
     except ClientError as e:
         logging.error(e)
         return False
+    except Exception as ex:
+        print('No se pudo subir el archivo pedido: '+str(ex))
+        return False
     except:
-        print('No se pudo subir el file pedido')
+        print('No se pudo subir el archivo pedido')
+        return False
     print('Se subio el archivo '+file_name+' en el bucket '+bucket)
     return True
 
@@ -119,8 +123,12 @@ def download_file(path_download, file_name, bucket, object_name=None):
     except ClientError as e:
         print ('No se pudo bajar el file '+ str(e))
         return False
+    except Exception as ex:
+        print('No se pudo bajar el archivo pedido: '+str(ex))
+        return False
     except:
         print ('No se pudo bajar el file pedido ')
+        return False
     print ('Se bajo el File pedido: '+ file_name)
     return True
 
