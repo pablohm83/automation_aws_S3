@@ -1,3 +1,4 @@
+
 import logging
 from pickle import FALSE
 import sys
@@ -190,6 +191,7 @@ if __name__=='__main__':
         elif option == 5:
             list_buckets()
             BUCKET_NAME = input('Ingrese el nombre del bucket desde donde se bajara el achivo: ')
+            list_files_bucket(BUCKET_NAME)
             FILE_NAME_DOWNLOAD = input('Ingrese el nombre del archivo a bajar: ')
             path_download=input('Ingrese el path destino: ')
             download_file(path_download, FILE_NAME_DOWNLOAD,BUCKET_NAME)
