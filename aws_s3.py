@@ -1,5 +1,6 @@
 import logging
 from pickle import FALSE
+import sys
 import boto3
 from botocore.exceptions import ClientError
 import os
@@ -145,6 +146,7 @@ def list_buckets():
     print('Buckets existentes:')
     for bucket in response['Buckets']:
         print(f'  {bucket["Name"]}')
+    print(' ')
     return True
 
 def list_files_bucket(BUCKET_NAME):
@@ -177,18 +179,22 @@ if __name__=='__main__':
         elif option == 2:
             list_buckets()
         elif option == 3:
+            list_buckets()
             BUCKET_NAME = input('Ingrese el nombre del bucket para listar los archivos: ')
             list_files_bucket(BUCKET_NAME)
         elif option == 4:
+            list_buckets()
             BUCKET_NAME = input('Ingrese el nombre del bucket donde se subira el achivo: ')
             FILE_NAME_UPLOAD = input('Ingrese el path y nombre del archivo. EJ: /home/file.txt: ')
             upload_file(FILE_NAME_UPLOAD,BUCKET_NAME)
         elif option == 5:
+            list_buckets()
             BUCKET_NAME = input('Ingrese el nombre del bucket desde donde se bajara el achivo: ')
             FILE_NAME_DOWNLOAD = input('Ingrese el nombre del archivo a bajar: ')
             path_download=input('Ingrese el path destino: ')
             download_file(path_download, FILE_NAME_DOWNLOAD,BUCKET_NAME)
         elif option == 6:
+            list_buckets()
             BUCKET_NAME = input('Ingrese el nombre del bucket para obtener las ACLs: ')
             get_acls(BUCKET_NAME)
         elif option == 7:
