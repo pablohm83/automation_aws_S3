@@ -209,4 +209,4 @@ if __name__=='__main__':
         elif option == 7:
             exit()
         else:
-            print('Opcion invalida. Ingresar un numero del 1 al 6.')
+            print('Opcion invalida. Ingresar un numero del 1 al 7.')
