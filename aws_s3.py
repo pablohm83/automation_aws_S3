@@ -52,7 +52,7 @@ def ask_user():
         except:
             print('Error en credenciales o conexion')
             exit(1)
-        return False
+        return True
     elif (OPTION_USER.lower() == 'y' or OPTION_USER.lower() == 'yes'):
         try:
             response = s3_client.list_buckets()
@@ -62,10 +62,10 @@ def ask_user():
         except:
             print('Error en credenciales o conexion')
             exit(1)        
-        return False
+        return True
     else:
         print('Opcion incorrecta, solo [y/n]')
-        return True
+        return False
 
 def print_menu():
     print(' ')
@@ -168,8 +168,8 @@ def list_files_bucket(BUCKET_NAME):
     return True
     
 if __name__=='__main__':
-    OK=True
-    while (OK):
+    OK=False
+    while (not OK):
         OK=ask_user()
 
     while(True):
@@ -209,4 +209,4 @@ if __name__=='__main__':
         elif option == 7:
             exit()
         else:
-            print('Opcion invalida. Ingresar un numero del 1 al 7.')
+            print('Opcion invalida. Ingresar un numero del 1 al 6.')
